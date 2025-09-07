@@ -29,6 +29,10 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { postsAPI } from "@/services/api";
 
+// Use the same API base URL as the rest of the app
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
+
 interface UploadModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -176,11 +180,11 @@ export const UploadModal = ({ isOpen, onClose, type }: UploadModalProps) => {
         const uploadFormData = new FormData();
         const isVideo = selectedFile.type.startsWith("video/");
         const fieldName = isVideo ? "video" : "image";
-        const endpoint = isVideo ? "/api/uploads/video" : "/api/uploads/image";
+        const endpoint = isVideo ? "/uploads/video" : "/uploads/image";
 
         uploadFormData.append(fieldName, selectedFile);
 
-        const uploadResponse = await fetch(`http://localhost:3000${endpoint}`, {
+        const uploadResponse = await fetch(`${API_BASE_URL}${endpoint}`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -220,7 +224,7 @@ export const UploadModal = ({ isOpen, onClose, type }: UploadModalProps) => {
 
       console.log("Creating post with data:", postData);
 
-      const postResponse = await fetch("http://localhost:3000/api/posts", {
+      const postResponse = await fetch(`${API_BASE_URL}/posts`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
