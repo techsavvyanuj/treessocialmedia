@@ -52,25 +52,43 @@ cp .env.example .env
 ```
 Edit the `.env` file with your configuration.
 
+**Environment Options:**
+- Use `.env` (default) - configured for deployed backend
+- Use `.env.local` - for local development with localhost backend
+- Use `.env.production` - for production builds
+
 ## 🏃‍♂️ Development
 
+### For Local Development (with local backend):
 1. **Start the backend server**
 ```bash
 npm run backend:dev
 ```
 
-2. **Start the frontend development server**
+2. **Start the frontend with local environment**
 ```bash
+npm run dev:local
+```
+
+### For Development with Deployed Backend:
+1. **Start the frontend with production backend**
+```bash
+npm run dev:production
+# or just
 npm run dev
 ```
 
-3. **Open your browser**
+2. **Open your browser**
 Navigate to `http://localhost:8080`
 
 ## 🔧 Available Scripts
 
-- `npm run dev` - Start development server
+- `npm run dev` - Start development server (uses deployed backend)
+- `npm run dev:local` - Start development server (uses local backend)
+- `npm run dev:production` - Start development server (uses deployed backend)
 - `npm run build` - Build for production
+- `npm run build:local` - Build with local environment
+- `npm run build:production` - Build with production environment
 - `npm run preview` - Preview production build
 - `npm run lint` - Run ESLint
 - `npm run backend:dev` - Start backend development server
@@ -117,12 +135,14 @@ Make sure to:
 
 ## 🔑 Environment Variables
 
+The project supports multiple environment configurations:
+
+### **Production (Deployed Backend):**
 ```env
-# Frontend
-VITE_API_BASE_URL=your_backend_url
+VITE_API_BASE_URL=https://trees-backend-7pci.onrender.com/api
+VITE_SOCKET_URL=https://trees-backend-7pci.onrender.com
 VITE_APP_NAME="TreesWeb Social"
-VITE_SOCKET_URL=your_backend_url
-VITE_FRONTEND_URL=your_frontend_url
+VITE_FRONTEND_URL=your_vercel_deployment_url
 
 # Feature Flags
 VITE_ENABLE_LIVESTREAMING=true
@@ -130,6 +150,26 @@ VITE_ENABLE_ARCADE=true
 VITE_ENABLE_SUBSCRIPTIONS=true
 VITE_ENABLE_ADMIN_PANEL=true
 ```
+
+### **Local Development:**
+```env
+VITE_API_BASE_URL=http://localhost:3000/api
+VITE_SOCKET_URL=http://localhost:3000
+VITE_APP_NAME="TreesWeb Social"
+VITE_FRONTEND_URL=http://localhost:8080
+
+# Feature Flags
+VITE_ENABLE_LIVESTREAMING=true
+VITE_ENABLE_ARCADE=true
+VITE_ENABLE_SUBSCRIPTIONS=true
+VITE_ENABLE_ADMIN_PANEL=true
+```
+
+### **Environment Files:**
+- `.env` - Default configuration (uses deployed backend)
+- `.env.local` - Local development configuration
+- `.env.production` - Production build configuration
+- `.env.example` - Template with all available options
 
 ## 📱 Mobile Responsive
 

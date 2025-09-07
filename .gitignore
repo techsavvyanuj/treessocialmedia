@@ -1,8 +1,12 @@
 ﻿# root
 .env
-*.env
+.env.local
 *.log
 .DS_Store
+
+# Keep environment templates and production configs
+!.env.example
+!.env.production
 
 # node
 node_modules/
