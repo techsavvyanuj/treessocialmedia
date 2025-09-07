@@ -1,0 +1,23 @@
+﻿# root
+.env
+*.env
+*.log
+.DS_Store
+
+# node
+node_modules/
+dist/
+build/
+
+# backend
+backend/.env
+backend/node_modules/
+backend/uploads/
+backend/seed-output/
+
+# frontend
+Treeswebfrontend-main/node_modules/
+Treeswebfrontend-main/dist/
+
+# misc
+*.zip
