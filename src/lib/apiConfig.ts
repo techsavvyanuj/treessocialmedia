@@ -3,10 +3,10 @@
 
 export const API_CONFIG = {
   // Base API URL from environment variable
-  BASE_URL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api",
+  BASE_URL: "https://trees-backend-7pci.onrender.com/api",
   
   // Socket URL from environment variable  
-  SOCKET_URL: import.meta.env.VITE_SOCKET_URL || "http://localhost:3000",
+  SOCKET_URL: "https://trees-backend-7pci.onrender.com",
   
   // Upload endpoints
   ENDPOINTS: {

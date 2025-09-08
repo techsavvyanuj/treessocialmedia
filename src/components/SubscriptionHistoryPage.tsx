@@ -290,8 +290,8 @@ export const SubscriptionHistoryPage = () => {
                       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
                         {/* Left side - Creator and Plan Info */}
                         <div className="flex items-start space-x-4">
-                          <div className={`w-16 h-16 ${subscription.color} rounded-full flex items-center justify-center flex-shrink-0`}>
-                            <Icon className="w-8 h-8 text-white" />
+                          <div className={`w-8 h-8 ${subscription.color} rounded-full flex items-center justify-center`}>
+                            {Icon && typeof Icon === 'function' ? <Icon /> : null}
                           </div>
                           <div className="space-y-2">
                             <div className="flex items-center space-x-3">

@@ -207,8 +207,8 @@ export const StreamerSubscriptionStatus = () => {
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div className="flex items-center space-x-4">
-                          <div className={`w-16 h-16 ${subscription.color} rounded-full flex items-center justify-center`}>
-                            <Icon className="w-8 h-8 text-white" />
+                          <div className={`w-8 h-8 ${subscription.color} rounded-full flex items-center justify-center`}>
+                            {Icon && typeof Icon === 'function' ? <Icon /> : null}
                           </div>
                           <div>
                             <div className="flex items-center space-x-2 mb-2">

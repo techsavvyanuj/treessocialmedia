@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -241,14 +241,14 @@ export const StreamerSubscriptionModal = ({
                 <Card
                   key={tier.id}
                   className={`cursor-pointer transition-all hover:shadow-lg ${
-                    isSelected ? `ring-2 ring-primary ${tier.borderColor}` : ''
+                    isSelected ? `ring-2 ring-primary` : ''
                   }`}
                   onClick={() => setSelectedTier(tier)}
                 >
                   <CardHeader className="text-center pb-2">
                     <div className="flex justify-center mb-2">
                       <div className={`w-12 h-12 ${tier.color} rounded-full flex items-center justify-center`}>
-                        <Icon className="w-6 h-6 text-white" />
+                        {Icon && typeof Icon === 'function' ? <Icon /> : null}
                       </div>
                     </div>
                     <CardTitle className="text-lg font-inter">{tier.name}</CardTitle>

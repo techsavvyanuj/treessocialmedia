@@ -29,10 +29,6 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { postsAPI } from "@/services/api";
 
-// Use the same API base URL as the rest of the app
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
-
 interface UploadModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -69,6 +65,8 @@ const SUPPORTED_TYPES = {
     "video/webm",
   ],
 };
+
+const API_BASE_URL = "https://trees-backend-7pci.onrender.com/api";
 
 export const UploadModal = ({ isOpen, onClose, type }: UploadModalProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -180,7 +178,7 @@ export const UploadModal = ({ isOpen, onClose, type }: UploadModalProps) => {
         const uploadFormData = new FormData();
         const isVideo = selectedFile.type.startsWith("video/");
         const fieldName = isVideo ? "video" : "image";
-        const endpoint = isVideo ? "/uploads/video" : "/uploads/image";
+        const endpoint = isVideo ? "/api/uploads/video" : "/api/uploads/image";
 
         uploadFormData.append(fieldName, selectedFile);
 

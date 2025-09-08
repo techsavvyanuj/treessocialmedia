@@ -10,7 +10,7 @@ export const getSocket = () => {
       /\/api$/,
       ""
     ) ||
-    "http://localhost:3000";
+    "https://trees-backend-7pci.onrender.com";
   const token = localStorage.getItem("token");
   socket = io(url, {
     autoConnect: false,

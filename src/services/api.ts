@@ -2,7 +2,7 @@ import { toast } from "@/hooks/use-toast";
 
 // API Configuration
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
+  import.meta.env.VITE_API_BASE_URL || "https://trees-backend-7pci.onrender.com/api";
 
 // Types
 export interface ApiResponse<T = any> {

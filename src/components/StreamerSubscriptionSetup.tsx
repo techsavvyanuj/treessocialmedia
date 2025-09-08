@@ -279,7 +279,7 @@ export const StreamerSubscriptionSetup = () => {
                         )}
                         <CardHeader className="text-center pb-2">
                           <div className={`w-12 h-12 ${tier.color} rounded-full flex items-center justify-center mx-auto mb-2`}>
-                            <Icon className="w-6 h-6 text-white" />
+                          {Icon && typeof Icon === 'function' ? <Icon /> : null}
                           </div>
                           <CardTitle className="text-lg">{tier.name}</CardTitle>
                           <div className="text-2xl font-bold text-primary">
@@ -399,7 +399,7 @@ export const StreamerSubscriptionSetup = () => {
                       <Card key={tier.id} className="border-2 border-gray-200 hover:border-primary transition-colors">
                         <CardHeader className="text-center">
                           <div className={`w-16 h-16 ${tier.color} rounded-full flex items-center justify-center mx-auto mb-4`}>
-                            <Icon className="w-8 h-8 text-white" />
+                            {Icon && typeof Icon === 'function' ? <Icon /> : null}
                           </div>
                           <CardTitle className="text-xl">{tier.name}</CardTitle>
                           <div className="text-3xl font-bold text-primary">
