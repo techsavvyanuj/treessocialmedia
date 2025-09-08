@@ -178,7 +178,7 @@ export const UploadModal = ({ isOpen, onClose, type }: UploadModalProps) => {
         const uploadFormData = new FormData();
         const isVideo = selectedFile.type.startsWith("video/");
         const fieldName = isVideo ? "video" : "image";
-        const endpoint = isVideo ? "/api/uploads/video" : "/api/uploads/image";
+        const endpoint = isVideo ? "/uploads/video" : "/uploads/image";
 
         uploadFormData.append(fieldName, selectedFile);
 
