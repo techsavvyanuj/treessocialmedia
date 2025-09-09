@@ -37,7 +37,7 @@ cd treeswebfrontend-main/backend
 npm start
 ```
 
-**Backend will run on:** http://localhost:3000
+**Backend will run on:** http://51.20.41.208/api/
 
 ### Frontend Application
 
@@ -75,7 +75,7 @@ JWT_EXPIRES_IN=7d
 
 ```env
 # Backend API URL
-VITE_API_BASE_URL=http://localhost:3000/api
+VITE_API_BASE_URL=http://51.20.41.208/api/
 
 # App Configuration
 VITE_APP_NAME="TreesWeb Social"
@@ -83,7 +83,7 @@ VITE_APP_VERSION=1.0.0
 VITE_FRONTEND_URL=http://localhost:8080
 
 # Socket.IO Configuration
-VITE_SOCKET_URL=http://localhost:3000
+VITE_SOCKET_URL=http://51.20.41.208
 ```
 
 ## ✅ Verification Steps

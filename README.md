@@ -153,8 +153,8 @@ VITE_ENABLE_ADMIN_PANEL=true
 
 ### **Local Development:**
 ```env
-VITE_API_BASE_URL=http://localhost:3000/api
-VITE_SOCKET_URL=http://localhost:3000
+VITE_API_BASE_URL=http://51.20.41.208/api/
+VITE_SOCKET_URL=http://51.20.41.208
 VITE_APP_NAME="TreesWeb Social"
 VITE_FRONTEND_URL=http://localhost:8080
 

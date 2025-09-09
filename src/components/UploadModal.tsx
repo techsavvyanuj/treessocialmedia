@@ -66,7 +66,7 @@ const SUPPORTED_TYPES = {
   ],
 };
 
-const API_BASE_URL = "https://trees-backend-7pci.onrender.com/api";
+const API_BASE_URL = "http://51.20.41.208/api/";
 
 export const UploadModal = ({ isOpen, onClose, type }: UploadModalProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);

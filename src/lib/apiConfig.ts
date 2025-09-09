@@ -3,10 +3,10 @@
 
 export const API_CONFIG = {
   // Base API URL from environment variable
-  BASE_URL: "https://trees-backend-7pci.onrender.com/api",
+  BASE_URL: "http://51.20.41.208/api/",
   
   // Socket URL from environment variable  
-  SOCKET_URL: "https://trees-backend-7pci.onrender.com",
+  SOCKET_URL: "http://51.20.41.208",
   
   // Upload endpoints
   ENDPOINTS: {

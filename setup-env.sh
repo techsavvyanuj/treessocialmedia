@@ -20,14 +20,14 @@ case $choice in
         cp .env.local .env
         echo "✅ Copied .env.local to .env"
         echo "🚀 Run 'npm run dev:local' to start with local backend"
-        echo "📝 Make sure your local backend is running on http://localhost:3000"
+        echo "📝 Make sure your local backend is running on http://51.20.41.208/api/"
         ;;
     2)
         echo "Setting up PRODUCTION environment..."
         cp .env.production .env
         echo "✅ Copied .env.production to .env"
         echo "🚀 Run 'npm run dev' or 'npm run dev:production' to start"
-        echo "🌐 Using deployed backend: https://trees-backend-7pci.onrender.com"
+        echo "🌐 Using deployed backend: http://51.20.41.208/api/"
         ;;
     3)
         echo "Creating custom .env file..."

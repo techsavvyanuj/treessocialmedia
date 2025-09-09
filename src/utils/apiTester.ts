@@ -1,7 +1,7 @@
 // API Integration Test Script
 // This script validates that all API endpoints are working correctly
 
-const API_BASE_URL = "https://trees-backend-7pci.onrender.com/api";
+const API_BASE_URL = "http://51.20.41.208/api/";
 
 interface TestResult {
   endpoint: string;

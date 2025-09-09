@@ -2,7 +2,7 @@
 
 ## 📋 Issue Analysis
 
-**Error:** `POST http://localhost:3000/api/upload/image 404 (Not Found)`
+**Error:** `POST http://51.20.41.208/api/upload/image 404 (Not Found)`
 **Secondary Error:** `SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON`
 **Root Cause:** URL endpoint mismatch
 
