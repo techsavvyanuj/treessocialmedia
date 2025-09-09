@@ -2,7 +2,7 @@ import { toast } from "@/hooks/use-toast";
 
 // API Configuration
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://51.20.41.208/api/";
+  import.meta.env.VITE_API_BASE_URL || "https://51.20.41.208/api/";
 
 // Types
 export interface ApiResponse<T = any> {

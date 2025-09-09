@@ -230,7 +230,7 @@ export const SettingsPage = () => {
       const token = localStorage.getItem("token");
       const resp = await fetch(
         `${
-          import.meta.env.VITE_API_BASE_URL || "http://51.20.41.208/api/"
+          import.meta.env.VITE_API_BASE_URL || "https://51.20.41.208/api/"
         }/settings/account`,
         {
           method: "DELETE",
