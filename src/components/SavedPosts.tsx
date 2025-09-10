@@ -87,7 +87,7 @@ export const SavedPosts: React.FC = () => {
       // Fetch saved posts
       const postsRes = await fetch(
         `${
-          import.meta.env.VITE_API_BASE_URL || "https://51.20.41.208/api/"
+          import.meta.env.VITE_API_BASE_URL || "https://51.20.41.208/api"
         }/posts/saved`,
         {
           headers: {
@@ -106,7 +106,7 @@ export const SavedPosts: React.FC = () => {
       // Fetch saved reels
       const reelsRes = await fetch(
         `${
-          import.meta.env.VITE_API_BASE_URL || "https://51.20.41.208/api/"
+          import.meta.env.VITE_API_BASE_URL || "https://51.20.41.208/api"
         }/reels/saved`,
         {
           headers: {
@@ -196,7 +196,7 @@ export const SavedPosts: React.FC = () => {
       } else {
         const response = await fetch(
           `${
-            import.meta.env.VITE_API_BASE_URL || "https://51.20.41.208/api/"
+            import.meta.env.VITE_API_BASE_URL || "https://51.20.41.208/api"
           }/reels/${postId}/save`,
           {
             method: "POST",

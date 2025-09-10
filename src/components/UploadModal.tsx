@@ -66,7 +66,7 @@ const SUPPORTED_TYPES = {
   ],
 };
 
-const API_BASE_URL = "https://51.20.41.208/api/";
+const API_BASE_URL = "https://51.20.41.208/api";
 
 export const UploadModal = ({ isOpen, onClose, type }: UploadModalProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
