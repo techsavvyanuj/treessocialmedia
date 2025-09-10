@@ -311,6 +311,7 @@ export const EnhancedAuthModal = ({
       }
 
       const success = await register(
+        registerData.fullName,
         registerData.username,
         registerData.email,
         registerData.password,
