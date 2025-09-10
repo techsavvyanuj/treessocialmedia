@@ -179,25 +179,71 @@ export const EnhancedAuthModal = ({
     }
   };
 
+  const passwordFormat = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{6,}$/;
+  const usernameFormat = /^[a-zA-Z0-9_]{3,20}$/;
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Validate required fields
-    if (
-      !registerData.fullName ||
-      !registerData.username ||
-      !registerData.email ||
-      !registerData.password ||
-      !registerData.confirmPassword
-    ) {
+    if (!registerData.fullName) {
       toast({
-        title: "Error",
-        description: "Please fill in all required fields",
+        title: "Full Name Required",
+        description: "Please enter your full name.",
         variant: "destructive",
       });
       return;
     }
-
+    if (!registerData.username) {
+      toast({
+        title: "Username Required",
+        description: "Please choose a username.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!usernameFormat.test(registerData.username)) {
+      toast({
+        title: "Invalid Username",
+        description:
+          "Username must be 3-20 characters, only letters, numbers, and underscores.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!registerData.email) {
+      toast({
+        title: "Email Required",
+        description: "Please enter your email.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!registerData.password) {
+      toast({
+        title: "Password Required",
+        description: "Please create a password.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!passwordFormat.test(registerData.password)) {
+      toast({
+        title: "Weak Password",
+        description:
+          "Password must have at least 1 uppercase, 1 lowercase, 1 number, 1 special character.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!registerData.confirmPassword) {
+      toast({
+        title: "Confirm Password",
+        description: "Please confirm your password.",
+        variant: "destructive",
+      });
+      return;
+    }
     // Validate password match
     if (registerData.password !== registerData.confirmPassword) {
       toast({
@@ -207,7 +253,6 @@ export const EnhancedAuthModal = ({
       });
       return;
     }
-
     // Validate password length
     if (registerData.password.length < 6) {
       toast({
@@ -217,7 +262,6 @@ export const EnhancedAuthModal = ({
       });
       return;
     }
-
     // Validate OTP
     if (!otpSent || !otpCode) {
       toast({
