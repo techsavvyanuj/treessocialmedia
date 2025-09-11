@@ -544,15 +544,26 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             </div>
           </div>
 
-          {/* Story Image */}
-          <div className="relative w-full h-[600px]">
-            <img
-              src={currentStory.image}
-              alt="Story"
-              className="w-full h-full object-cover"
-              onClick={handlePause}
-            />
-
+          {/* Story Image/Video */}
+          <div className="relative w-full flex items-center justify-center bg-black" style={{height: 'min(70vw, 70vh, 420px)'}}>
+            {currentStory.image &&
+              (/\.(mp4|webm|ogg|mov|avi)$/i.test(currentStory.image) ? (
+                <video
+                  src={currentStory.image}
+                  controls
+                  className="max-w-full max-h-[70vh] max-h-[420px] w-auto h-auto object-contain rounded-lg shadow-lg"
+                  style={{margin: '0 auto'}}
+                  onClick={handlePause}
+                />
+              ) : (
+                <img
+                  src={currentStory.image}
+                  alt="Story"
+                  className="max-w-full max-h-[70vh] max-h-[420px] w-auto h-auto object-contain rounded-lg shadow-lg"
+                  style={{margin: '0 auto'}}
+                  onClick={handlePause}
+                />
+              ))}
             {/* Text Overlays */}
             {currentStory.textOverlays.map((overlay) => (
               <div
