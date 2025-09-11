@@ -223,7 +223,12 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
       if (!isPaused && !showInsights) {
         setProgress((prev) => {
           if (prev >= 100) {
-            nextStory();
+            // Auto-advance to next story or close if it's the last one
+            if (currentStoryIndex < stories.length - 1) {
+              nextStory();
+            } else {
+              onClose();
+            }
             return 0;
           }
           return prev + 100 / (storyDuration / 100);
@@ -258,6 +263,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     if (currentStoryIndex < stories.length - 1) {
       onStoryChange(currentStoryIndex + 1);
     } else {
+      // Auto-close when reaching the end of stories
       onClose();
     }
   };
@@ -450,7 +456,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md p-0 bg-black border-0">
+      <DialogContent className="w-full h-full max-w-none max-h-none p-0 bg-black border-0 rounded-none">
         {/* A11y: Provide required title/description for screen readers */}
         <DialogTitle className="sr-only">
           {currentStory.user?.name
@@ -460,14 +466,14 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
         <DialogDescription className="sr-only">
           {`Posted ${formatTimeAgo(currentStory.createdAt)} • ${timeRemaining}`}
         </DialogDescription>
-        <div className="relative">
+        <div className="relative w-full h-full flex flex-col">
           {/* Progress Bar */}
-          <div className="absolute top-0 left-0 right-0 z-10 p-4">
+          <div className="absolute top-4 left-4 right-4 z-10">
             <div className="flex gap-1">
               {stories.map((_, index) => (
                 <div
                   key={index}
-                  className={`h-1 flex-1 rounded-full transition-all duration-100 ${
+                  className={`h-0.5 flex-1 rounded-full transition-all duration-100 ${
                     index === currentStoryIndex
                       ? index < currentStoryIndex
                         ? "bg-white"
@@ -487,7 +493,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
           </div>
 
           {/* Header */}
-          <div className="absolute top-16 left-0 right-0 z-10 p-4">
+          <div className="absolute top-12 left-4 right-4 z-10">
             <div className="flex items-center justify-between text-white">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
@@ -496,14 +502,11 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   </span>
                 </div>
                 <div>
-                  <div className="font-medium">
+                  <div className="font-medium text-sm">
                     {currentStory.user?.name || "Your Story"}
                   </div>
                   <div className="text-xs text-white/70 flex items-center gap-2">
-                    <Clock className="w-3 h-3" />
-                    <span>Posted {formatTimeAgo(currentStory.createdAt)}</span>
-                    <span>•</span>
-                    <span>{timeRemaining} left</span>
+                    <span>{formatTimeAgo(currentStory.createdAt)}</span>
                   </div>
                 </div>
               </div>
@@ -523,7 +526,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                         variant="ghost"
                         size="sm"
                         onClick={handleInsights}
-                        className="text-white hover:bg-white/20"
+                        className="text-white hover:bg-white/20 p-2"
                         aria-label="Toggle insights"
                       >
                         <BarChart3 className="w-4 h-4" />
@@ -535,7 +538,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={handleClose}
-                  className="text-white hover:bg-white/20"
+                  className="text-white hover:bg-white/20 p-2"
                   aria-label="Close viewer"
                 >
                   <X className="w-4 h-4" />
@@ -545,32 +548,44 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
           </div>
 
           {/* Story Image/Video */}
-          <div className="relative w-full flex items-center justify-center bg-black overflow-hidden" style={{height: 'min(45vw, 45vh, 260px)', minHeight: 120, borderRadius: 12, boxShadow: '0 2px 12px rgba(0,0,0,0.25)'}}>
+          <div className="flex-1 relative flex items-center justify-center bg-black">
             {currentStory.image &&
               (/\.(mp4|webm|ogg|mov|avi)$/i.test(currentStory.image) ? (
                 <video
                   src={currentStory.image}
                   controls
-                  className="max-w-full max-h-full w-auto h-auto object-contain rounded-lg shadow-lg bg-black"
-                  style={{margin: '0 auto', background: '#000', zIndex: 1, position: 'relative'}}
+                  className="w-full h-full object-cover"
+                  style={{maxHeight: '100vh'}}
                   onClick={handlePause}
                 />
               ) : (
                 <img
                   src={currentStory.image}
                   alt="Story"
-                  className="max-w-full max-h-full w-auto h-auto object-contain rounded-lg shadow-lg bg-black"
-                  style={{margin: '0 auto', background: '#000', zIndex: 1, position: 'relative'}}
+                  className="w-full h-full object-cover"
+                  style={{maxHeight: '100vh'}}
                   onClick={handlePause}
                 />
               ))}
-            {/* Overlay to prevent stacking/overlap */}
-            <div className="absolute inset-0 pointer-events-none" style={{zIndex: 2, background: 'transparent'}} />
+              
+            {/* Invisible touch areas for navigation */}
+            <div className="absolute inset-0 flex">
+              {/* Left side - previous story */}
+              <div 
+                className="flex-1 cursor-pointer" 
+                onClick={previousStory}
+              />
+              {/* Right side - next story */}
+              <div 
+                className="flex-1 cursor-pointer" 
+                onClick={nextStory}
+              />
+            </div>
             {/* Text Overlays */}
             {currentStory.textOverlays.map((overlay) => (
               <div
                 key={overlay.id}
-                className="absolute select-none"
+                className="absolute select-none z-20"
                 style={{
                   left: overlay.x,
                   top: overlay.y,
@@ -588,7 +603,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             {currentStory.stickers.map((sticker) => (
               <div
                 key={sticker.id}
-                className="absolute select-none"
+                className="absolute select-none z-20"
                 style={{
                   left: sticker.x,
                   top: sticker.y,
@@ -598,33 +613,10 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                 {sticker.emoji}
               </div>
             ))}
-
-            {/* Navigation Arrows */}
-            {stories.length > 1 && (
-              <>
-                {currentStoryIndex > 0 && (
-                  <button
-                    onClick={previousStory}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/30 hover:bg-black/50 text-white rounded-full flex items-center justify-center transition-colors"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-                )}
-
-                {currentStoryIndex < stories.length - 1 && (
-                  <button
-                    onClick={nextStory}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/30 hover:bg-black/50 text-white rounded-full flex items-center justify-center transition-colors"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
-                )}
-              </>
-            )}
           </div>
 
           {/* Bottom Actions */}
-          <div className="absolute bottom-0 left-0 right-0 z-10 p-4">
+          <div className="absolute bottom-4 left-4 right-4 z-10">
             <div className="flex items-center justify-between text-white">
               <div className="flex items-center gap-4">
                 <button
@@ -638,7 +630,6 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   <Heart
                     className={`w-4 h-4 ${hasLiked ? "fill-current" : ""}`}
                   />
-                  <span className="text-sm">{hasLiked ? "Liked" : "Like"}</span>
                 </button>
                 {(() => {
                   const me = String(
@@ -656,7 +647,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                         aria-label="Show viewers"
                       >
                         <Eye className="w-4 h-4" />
-                        <span className="text-sm">{viewsCount} views</span>
+                        <span className="text-sm">{viewsCount}</span>
                       </button>
                     )
                   );

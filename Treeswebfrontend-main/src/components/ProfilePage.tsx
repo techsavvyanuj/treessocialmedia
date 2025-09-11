@@ -35,6 +35,7 @@ import {
   Play,
   Mail,
   Share,
+  Trash2,
 } from "lucide-react";
 import SegmentedRing from "./SegmentedRing";
 import {
@@ -63,6 +64,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/hooks/useAuth";
 import { UserProfile, postsAPI, authAPI, usersAPI } from "@/services/api";
 import { useStorySeen } from "@/hooks/useStorySeen";
+import { usePosts } from "@/hooks/usePosts";
 
 // Real user profile management with authentication
 interface ExtendedUserProfile extends UserProfile {
@@ -138,9 +140,13 @@ export const ProfilePage = () => {
   const [following, setFollowing] = useState(initialFollowing);
   const [posts, setPosts] = useState(initialPosts);
   const [postsLoading, setPostsLoading] = useState(true);
+  const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [postToDelete, setPostToDelete] = useState<string | null>(null);
   const isMobile = useIsMobile();
   const { hasSeen, markSeen } = useStorySeen();
   const { settings, updatePrivacySettings, refreshSettings } = useSettings();
+  const { deletePost } = usePosts();
 
   // Navigate to another user's profile and close any open follower/following modal
   const openUserProfile = useCallback((userId: string) => {
@@ -292,6 +298,64 @@ export const ProfilePage = () => {
     }
   }, [authUser?.id]);
 
+  // Delete post function
+  const handleDeletePost = async (postId: string) => {
+    try {
+      setDeletingPostId(postId);
+      const success = await deletePost(postId);
+      
+      if (success) {
+        // Remove post from local state
+        setPosts((prev) => prev.filter((post) => post.id !== postId));
+        // Update post count
+        setUser((prev) =>
+          prev ? { ...prev, posts: (prev.posts || 1) - 1 } : prev
+        );
+        toast({
+          title: "Success",
+          description: "Post deleted successfully",
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete post",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingPostId(null);
+      setShowDeleteConfirm(false);
+      setPostToDelete(null);
+    }
+  };
+
+  // Delete story function
+  const handleDeleteStory = async (storyId: string) => {
+    try {
+      // For now, just remove from local state since stories don't have a delete API
+      // In a real app, you'd call a deleteStory API
+      setUserStories((prev) => prev.filter((story) => story.id !== storyId));
+      toast({
+        title: "Success",
+        description: "Story deleted successfully",
+      });
+    } catch (error) {
+      console.error("Error deleting story:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete story",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Confirm delete function
+  const confirmDelete = (postId: string) => {
+    setPostToDelete(postId);
+    setShowDeleteConfirm(true);
+  };
+
   // Handler to open followers modal and fetch data
   const handleShowFollowers = useCallback(() => {
     setShowFollowers(true);
@@ -363,11 +427,24 @@ export const ProfilePage = () => {
       refreshPosts();
     };
 
-    // Listen for custom post created event
+    const handlePostDeleted = (e: any) => {
+      const { postId } = e.detail || {};
+      if (postId) {
+        console.log("Post deleted event received, removing from state...");
+        setPosts((prev) => prev.filter((post) => post.id !== postId));
+        setUser((prev) =>
+          prev ? { ...prev, posts: (prev.posts || 1) - 1 } : prev
+        );
+      }
+    };
+
+    // Listen for custom post events
     window.addEventListener("postCreated", handlePostCreated);
+    window.addEventListener("postDeleted", handlePostDeleted);
 
     return () => {
       window.removeEventListener("postCreated", handlePostCreated);
+      window.removeEventListener("postDeleted", handlePostDeleted);
     };
   }, []); // Empty deps since we want this to be stable
 
@@ -1199,6 +1276,21 @@ export const ProfilePage = () => {
                               alt="Post"
                               className="w-full h-full object-cover"
                             />
+                            {/* Delete button - only show on hover */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                confirmDelete(post.id);
+                              }}
+                              className="absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 z-10"
+                              disabled={deletingPostId === post.id}
+                            >
+                              {deletingPostId === post.id ? (
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                              ) : (
+                                <Trash2 className="w-4 h-4" />
+                              )}
+                            </button>
                             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-white text-center">
                                 <div className="flex items-center justify-center space-x-4 text-sm">
@@ -1283,6 +1375,21 @@ export const ProfilePage = () => {
                             <div className="absolute top-2 left-2">
                               <Play className="w-4 h-4 text-white drop-shadow-lg" />
                             </div>
+                            {/* Delete button - only show on hover */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                confirmDelete(post.id);
+                              }}
+                              className="absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 z-10"
+                              disabled={deletingPostId === post.id}
+                            >
+                              {deletingPostId === post.id ? (
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                              ) : (
+                                <Trash2 className="w-4 h-4" />
+                              )}
+                            </button>
                             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-white text-center">
                                 <div className="flex items-center justify-center space-x-4 text-sm">
@@ -1671,6 +1778,50 @@ export const ProfilePage = () => {
                 Send Gift Subscription
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete Post</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this post? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end space-x-2 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowDeleteConfirm(false);
+                setPostToDelete(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (postToDelete) {
+                  handleDeletePost(postToDelete);
+                }
+              }}
+              disabled={deletingPostId !== null}
+            >
+              {deletingPostId ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete
+                </>
+              )}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

@@ -23,10 +23,12 @@ import {
   Copy,
   Link,
   Download,
+  Trash2,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { postsAPI } from "@/services/api";
 import { useAuth } from "@/hooks/useAuth";
+import { usePosts } from "@/hooks/usePosts";
 
 interface PostDetailProps {
   isOpen: boolean;
@@ -74,12 +76,14 @@ export const PostDetail: React.FC<PostDetailProps> = ({
   post,
 }) => {
   const { user: authUser } = useAuth();
+  const { deletePost } = usePosts();
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState<number>(post.likes || 0);
   const [isSaved, setIsSaved] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [comments, setComments] = useState<Comment[]>(post.comments || []);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     // Initialize from given post; backend doesn't expose GET /posts/:id
@@ -299,6 +303,53 @@ export const PostDetail: React.FC<PostDetailProps> = ({
     setShowMoreOptions(false);
   };
 
+  const handleDelete = async () => {
+    if (!post?.id) return;
+    
+    // Check if this is the user's own post
+    const isOwnPost = post.user?.username === authUser?.username || 
+                     post.user?.name === authUser?.fullName;
+    
+    if (!isOwnPost) {
+      toast({
+        title: "Error",
+        description: "You can only delete your own posts",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+      const success = await deletePost(post.id);
+      
+      if (success) {
+        toast({
+          title: "Success",
+          description: "Post deleted successfully",
+        });
+        
+        // Close the modal
+        onClose();
+        
+        // Dispatch event to refresh profile page
+        window.dispatchEvent(new CustomEvent("postDeleted", { 
+          detail: { postId: post.id } 
+        }));
+      }
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete post",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setShowMoreOptions(false);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
@@ -367,6 +418,27 @@ export const PostDetail: React.FC<PostDetailProps> = ({
                       <Download className="w-4 h-4" />
                       Download
                     </button>
+                    {/* Only show delete option for user's own posts */}
+                    {(post.user?.username === authUser?.username || 
+                      post.user?.name === authUser?.fullName) && (
+                      <button
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                        className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2 text-red-600 disabled:opacity-50"
+                      >
+                        {isDeleting ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                            Deleting...
+                          </>
+                        ) : (
+                          <>
+                            <Trash2 className="w-4 h-4" />
+                            Delete
+                          </>
+                        )}
+                      </button>
+                    )}
                     <button
                       onClick={handleReport}
                       className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2 text-red-600"

@@ -39,15 +39,31 @@ export const usePosts = () => {
       const response = await postsAPI.getFeed(pageNum, 10);
 
       if (response.success && response.data) {
+        // Add defensive checks for the data structure
+        const posts = Array.isArray(response.data.posts) 
+          ? response.data.posts 
+          : Array.isArray(response.data) 
+          ? response.data 
+          : [];
+          
+        const hasMore = response.data.hasMore !== undefined 
+          ? response.data.hasMore 
+          : false;
+
         if (reset) {
-          setPosts(response.data.posts);
+          setPosts(posts);
         } else {
-          setPosts((prev) => [...prev, ...response.data.posts]);
+          setPosts((prev) => [...prev, ...posts]);
         }
-        setHasMore(response.data.hasMore);
+        setHasMore(hasMore);
         setPage(pageNum);
+      } else {
+        // Handle case where response is not successful
+        console.warn('Failed to load feed:', response);
+        setError('Failed to load posts');
       }
     } catch (err) {
+      console.error('Error loading feed:', err);
       const errorMessage = "Failed to load posts";
       setError(errorMessage);
       toast({

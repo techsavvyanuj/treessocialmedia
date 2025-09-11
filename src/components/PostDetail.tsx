@@ -23,10 +23,12 @@ import {
   Copy,
   Link,
   Download,
+  Trash2,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { postsAPI } from "@/services/api";
 import { useAuth } from "@/hooks/useAuth";
+import { usePosts } from "@/hooks/usePosts";
 
 interface PostDetailProps {
   isOpen: boolean;
@@ -74,6 +76,7 @@ export const PostDetail: React.FC<PostDetailProps> = ({
   post,
 }) => {
   const { user: authUser } = useAuth();
+  const { deletePost } = usePosts();
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState<number>(post.likes || 0);
   const [isSaved, setIsSaved] = useState(false);
@@ -299,6 +302,52 @@ export const PostDetail: React.FC<PostDetailProps> = ({
     setShowMoreOptions(false);
   };
 
+  const handleDelete = async () => {
+    if (!authUser) {
+      toast({
+        title: "Authentication required",
+        description: "You need to be logged in to delete posts",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!(post.user?.username === authUser?.username || 
+          post.user?.name === authUser?.fullName)) {
+      toast({
+        title: "Permission denied", 
+        description: "You can only delete your own posts",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const success = await deletePost(post.id);
+      
+      if (success) {
+        toast({
+          title: "Success",
+          description: "Post deleted successfully",
+        });
+        
+        // Emit post deleted event
+        window.dispatchEvent(new CustomEvent("postDeleted", { 
+          detail: { postId: post.id } 
+        }));
+        
+        onClose();
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete post",
+        variant: "destructive",
+      });
+    }
+    setShowMoreOptions(false);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
@@ -374,6 +423,17 @@ export const PostDetail: React.FC<PostDetailProps> = ({
                       <Flag className="w-4 h-4" />
                       Report
                     </button>
+                    {/* Only show delete option for user's own posts */}
+                    {(post.user?.username === authUser?.username || 
+                      post.user?.name === authUser?.fullName) && (
+                      <button
+                        onClick={handleDelete}
+                        className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2 text-red-600 border-t"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Delete
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
