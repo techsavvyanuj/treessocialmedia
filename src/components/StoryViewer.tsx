@@ -545,25 +545,27 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
           </div>
 
           {/* Story Image/Video */}
-          <div className="relative w-full flex items-center justify-center bg-black" style={{height: 'min(45vw, 45vh, 260px)'}}>
+          <div className="relative w-full flex items-center justify-center bg-black overflow-hidden" style={{height: 'min(45vw, 45vh, 260px)', minHeight: 120, borderRadius: 12, boxShadow: '0 2px 12px rgba(0,0,0,0.25)'}}>
             {currentStory.image &&
               (/\.(mp4|webm|ogg|mov|avi)$/i.test(currentStory.image) ? (
                 <video
                   src={currentStory.image}
                   controls
-                  className="max-w-full max-h-[45vh] max-h-[260px] w-auto h-auto object-contain rounded-lg shadow-lg"
-                  style={{margin: '0 auto'}}
+                  className="max-w-full max-h-full w-auto h-auto object-contain rounded-lg shadow-lg bg-black"
+                  style={{margin: '0 auto', background: '#000', zIndex: 1, position: 'relative'}}
                   onClick={handlePause}
                 />
               ) : (
                 <img
                   src={currentStory.image}
                   alt="Story"
-                  className="max-w-full max-h-[45vh] max-h-[260px] w-auto h-auto object-contain rounded-lg shadow-lg"
-                  style={{margin: '0 auto'}}
+                  className="max-w-full max-h-full w-auto h-auto object-contain rounded-lg shadow-lg bg-black"
+                  style={{margin: '0 auto', background: '#000', zIndex: 1, position: 'relative'}}
                   onClick={handlePause}
                 />
               ))}
+            {/* Overlay to prevent stacking/overlap */}
+            <div className="absolute inset-0 pointer-events-none" style={{zIndex: 2, background: 'transparent'}} />
             {/* Text Overlays */}
             {currentStory.textOverlays.map((overlay) => (
               <div
