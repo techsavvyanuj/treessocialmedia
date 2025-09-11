@@ -545,13 +545,13 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
           </div>
 
           {/* Story Image/Video */}
-          <div className="relative w-full flex items-center justify-center bg-black" style={{height: 'min(70vw, 70vh, 420px)'}}>
+          <div className="relative w-full flex items-center justify-center bg-black" style={{height: 'min(45vw, 45vh, 260px)'}}>
             {currentStory.image &&
               (/\.(mp4|webm|ogg|mov|avi)$/i.test(currentStory.image) ? (
                 <video
                   src={currentStory.image}
                   controls
-                  className="max-w-full max-h-[70vh] max-h-[420px] w-auto h-auto object-contain rounded-lg shadow-lg"
+                  className="max-w-full max-h-[45vh] max-h-[260px] w-auto h-auto object-contain rounded-lg shadow-lg"
                   style={{margin: '0 auto'}}
                   onClick={handlePause}
                 />
@@ -559,7 +559,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                 <img
                   src={currentStory.image}
                   alt="Story"
-                  className="max-w-full max-h-[70vh] max-h-[420px] w-auto h-auto object-contain rounded-lg shadow-lg"
+                  className="max-w-full max-h-[45vh] max-h-[260px] w-auto h-auto object-contain rounded-lg shadow-lg"
                   style={{margin: '0 auto'}}
                   onClick={handlePause}
                 />
