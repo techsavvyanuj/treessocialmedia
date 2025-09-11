@@ -96,10 +96,13 @@ export const UploadModal = ({ isOpen, onClose, type }: UploadModalProps) => {
 
       // File size validation
       const fileSizeMB = selectedFile.size / (1024 * 1024);
-      const maxSize = isImage
+      let maxSize = isImage
         ? FILE_SIZE_LIMITS[type].image
         : FILE_SIZE_LIMITS[type].video;
-
+      // For story images, enforce 5MB limit
+      if (type === "story" && isImage) {
+        maxSize = 5;
+      }
       if (fileSizeMB > maxSize) {
         newErrors.file = `File size must be less than ${maxSize}MB`;
       }
@@ -347,10 +350,26 @@ export const UploadModal = ({ isOpen, onClose, type }: UploadModalProps) => {
                 <div className="space-y-2">
                   <div className="flex items-center justify-center">
                     {selectedFile.type.startsWith("image/") ? (
+                      <img
+                        src={URL.createObjectURL(selectedFile)}
+                        alt="preview"
+                        className="max-w-full max-h-60 rounded object-contain border border-gray-200 mx-auto"
+                        style={{ display: type === "story" ? "block" : "none" }}
+                      />
+                    ) : (
+                      <video
+                        src={URL.createObjectURL(selectedFile)}
+                        controls
+                        className="max-w-full max-h-60 rounded object-contain border border-gray-200 mx-auto"
+                        style={{ display: type === "story" ? "block" : "none" }}
+                      />
+                    )}
+                    {/* fallback to icon for non-story or if preview not needed */}
+                    {type !== "story" && (selectedFile.type.startsWith("image/") ? (
                       <Image className="w-8 h-8 text-green-500" />
                     ) : (
                       <Video className="w-8 h-8 text-blue-500" />
-                    )}
+                    ))}
                   </div>
                   <div>
                     <p className="text-xs font-medium truncate">{selectedFile.name}</p>
