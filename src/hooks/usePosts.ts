@@ -197,7 +197,10 @@ export const usePosts = () => {
   const deletePost = async (postId: string) => {
     try {
       setIsLoading(true);
+      console.log("Attempting to delete post:", postId);
+      
       const response = await postsAPI.deletePost(postId);
+      console.log("Delete response:", response);
 
       if (response.success) {
         setPosts((prev) => prev.filter((post) => post.id !== postId));
@@ -207,12 +210,24 @@ export const usePosts = () => {
           description: "Post deleted successfully",
         });
         return true;
+      } else {
+        // Handle specific error cases
+        let errorMessage = response.error || "Failed to delete post";
+        console.error("Delete failed:", response);
+        
+        toast({
+          title: "Delete Failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        return false;
       }
-      return false;
     } catch (err) {
+      console.error("Delete post error:", err);
+      
       toast({
         title: "Error",
-        description: "Failed to delete post",
+        description: "Network error occurred while deleting post",
         variant: "destructive",
       });
       return false;
