@@ -326,17 +326,17 @@ export const UploadModal = ({ isOpen, onClose, type }: UploadModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="w-full max-w-xs sm:max-w-sm md:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{getTitle()}</DialogTitle>
+      <DialogContent className="w-full max-w-[280px] sm:max-w-[320px] md:max-w-[380px] p-4">
+        <DialogHeader className="pb-2">
+          <DialogTitle className="text-lg">{getTitle()}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {/* File Upload */}
           <div className="space-y-2">
-            <Label>Media File *</Label>
+            <Label className="text-sm">Media File *</Label>
             <div
-              className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+              className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
                 dragActive ? "border-primary bg-primary/5" : "border-gray-300"
               } ${errors.file ? "border-red-500 bg-red-50" : ""}`}
               onDragOver={handleDragOver}
@@ -344,23 +344,23 @@ export const UploadModal = ({ isOpen, onClose, type }: UploadModalProps) => {
               onDrop={handleDrop}
             >
               {selectedFile ? (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <div className="flex items-center justify-center">
                     {selectedFile.type.startsWith("image/") ? (
-                      <Image className="w-12 h-12 text-green-500" />
+                      <Image className="w-8 h-8 text-green-500" />
                     ) : (
-                      <Video className="w-12 h-12 text-blue-500" />
+                      <Video className="w-8 h-8 text-blue-500" />
                     )}
                   </div>
                   <div>
-                    <p className="text-sm font-medium">{selectedFile.name}</p>
+                    <p className="text-xs font-medium truncate">{selectedFile.name}</p>
                     <p className="text-xs text-muted-foreground">
                       {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                     </p>
                   </div>
-                  <div className="flex items-center justify-center space-x-2">
-                    <Button variant="outline" size="sm" onClick={removeFile}>
-                      <X className="w-4 h-4 mr-1" />
+                  <div className="flex items-center justify-center space-x-1">
+                    <Button variant="outline" size="sm" onClick={removeFile} className="h-7 px-2 text-xs">
+                      <X className="w-3 h-3 mr-1" />
                       Remove
                     </Button>
                     <Button
@@ -369,20 +369,21 @@ export const UploadModal = ({ isOpen, onClose, type }: UploadModalProps) => {
                       onClick={() =>
                         document.getElementById("file-upload")?.click()
                       }
+                      className="h-7 px-2 text-xs"
                     >
                       Change
                     </Button>
                   </div>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <Upload
-                    className={`w-12 h-12 mx-auto ${
+                    className={`w-8 h-8 mx-auto ${
                       errors.file ? "text-red-500" : "text-gray-400"
                     }`}
                   />
                   <div>
-                    <p className="text-sm font-medium">
+                    <p className="text-xs font-medium">
                       {dragActive
                         ? "Drop your file here"
                         : "Drag & drop or click to select"}
@@ -397,7 +398,7 @@ export const UploadModal = ({ isOpen, onClose, type }: UploadModalProps) => {
                     </p>
                   </div>
                   <Label htmlFor="file-upload" className="cursor-pointer">
-                    <Button variant="outline" asChild>
+                    <Button variant="outline" asChild className="h-7 px-3 text-xs">
                       <span>Choose File</span>
                     </Button>
                     <Input
@@ -423,7 +424,7 @@ export const UploadModal = ({ isOpen, onClose, type }: UploadModalProps) => {
 
           {/* Caption */}
           <div className="space-y-2">
-            <Label htmlFor="caption">
+            <Label htmlFor="caption" className="text-sm">
               {type === "story" ? "Add text (optional)" : "Caption"}
             </Label>
             <Textarea
@@ -437,11 +438,11 @@ export const UploadModal = ({ isOpen, onClose, type }: UploadModalProps) => {
                 if (errors.caption)
                   setErrors((prev) => ({ ...prev, caption: "" }));
               }}
-              rows={3}
+              rows={2}
               maxLength={2000}
-              className={
+              className={`text-sm ${
                 errors.caption ? "border-red-500 focus:border-red-500" : ""
-              }
+              }`}
             />
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
@@ -461,13 +462,13 @@ export const UploadModal = ({ isOpen, onClose, type }: UploadModalProps) => {
           {/* Additional options for reels */}
           {type === "reel" && (
             <div className="space-y-2">
-              <Label>Reel Settings</Label>
-              <div className="text-sm text-muted-foreground bg-blue-50 p-3 rounded">
+              <Label className="text-sm">Reel Settings</Label>
+              <div className="text-xs text-muted-foreground bg-blue-50 p-2 rounded">
                 <ul className="space-y-1">
-                  <li>• Keep videos under 60 seconds for best engagement</li>
-                  <li>• Use trending audio for better reach</li>
-                  <li>• Add relevant hashtags in caption</li>
-                  <li>• Ensure good lighting and clear audio</li>
+                  <li>• Keep videos under 60 seconds</li>
+                  <li>• Use trending audio for reach</li>
+                  <li>• Add hashtags in caption</li>
+                  <li>• Ensure good lighting/audio</li>
                 </ul>
               </div>
             </div>
@@ -475,19 +476,19 @@ export const UploadModal = ({ isOpen, onClose, type }: UploadModalProps) => {
 
           {/* Story expiry notice */}
           {type === "story" && (
-            <div className="text-sm text-muted-foreground bg-blue-50 p-3 rounded border border-blue-200">
+            <div className="text-xs text-muted-foreground bg-blue-50 p-2 rounded border border-blue-200">
               <div className="flex items-center space-x-2">
-                <CheckCircle className="w-4 h-4 text-blue-500" />
+                <CheckCircle className="w-3 h-3 text-blue-500" />
                 <span>Your story will be visible for 24 hours</span>
               </div>
             </div>
           )}
 
-          <div className="flex space-x-2 pt-4">
+          <div className="flex space-x-2 pt-2">
             <Button
               variant="outline"
               onClick={handleClose}
-              className="flex-1"
+              className="flex-1 h-8 text-xs"
               disabled={isUploading}
             >
               Cancel
@@ -495,11 +496,11 @@ export const UploadModal = ({ isOpen, onClose, type }: UploadModalProps) => {
             <Button
               onClick={handleUpload}
               disabled={!selectedFile || isUploading}
-              className="flex-1"
+              className="flex-1 h-8 text-xs"
             >
               {isUploading ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="flex items-center space-x-1">
+                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   <span>Uploading...</span>
                 </div>
               ) : (
@@ -587,14 +588,14 @@ export const GoLiveModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Go Live</DialogTitle>
+      <DialogContent className="w-full max-w-[280px] sm:max-w-[320px] md:max-w-[380px] p-4">
+        <DialogHeader className="pb-2">
+          <DialogTitle className="text-lg">Go Live</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div className="space-y-2">
-            <Label htmlFor="stream-title">Stream Title *</Label>
+            <Label htmlFor="stream-title" className="text-sm">Stream Title *</Label>
             <Input
               id="stream-title"
               placeholder="What's your stream about?"
@@ -605,13 +606,13 @@ export const GoLiveModal = ({
                   setErrors((prev) => ({ ...prev, streamTitle: "" }));
               }}
               maxLength={100}
-              className={
+              className={`text-sm h-8 ${
                 errors.streamTitle ? "border-red-500 focus:border-red-500" : ""
-              }
+              }`}
             />
             {errors.streamTitle && (
-              <div className="flex items-center space-x-2 text-red-600 text-sm">
-                <AlertCircle className="w-4 h-4" />
+              <div className="flex items-center space-x-2 text-red-600 text-xs">
+                <AlertCircle className="w-3 h-3" />
                 <span>{errors.streamTitle}</span>
               </div>
             )}
@@ -621,7 +622,7 @@ export const GoLiveModal = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="stream-category">Category *</Label>
+            <Label htmlFor="stream-category" className="text-sm">Category *</Label>
             <Select
               value={streamCategory}
               onValueChange={(value) => {
@@ -631,11 +632,11 @@ export const GoLiveModal = ({
               }}
             >
               <SelectTrigger
-                className={
+                className={`h-8 text-sm ${
                   errors.streamCategory
                     ? "border-red-500 focus:border-red-500"
                     : ""
-                }
+                }`}
               >
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
@@ -648,25 +649,25 @@ export const GoLiveModal = ({
               </SelectContent>
             </Select>
             {errors.streamCategory && (
-              <div className="flex items-center space-x-2 text-red-600 text-sm">
-                <AlertCircle className="w-4 h-4" />
+              <div className="flex items-center space-x-2 text-red-600 text-xs">
+                <AlertCircle className="w-3 h-3" />
                 <span>{errors.streamCategory}</span>
               </div>
             )}
           </div>
 
-          <div className="text-sm text-muted-foreground bg-red-50 p-3 rounded border border-red-200">
+          <div className="text-xs text-muted-foreground bg-red-50 p-2 rounded border border-red-200">
             <div className="flex items-center space-x-2">
-              <Camera className="w-4 h-4 text-red-500" />
+              <Camera className="w-3 h-3 text-red-500" />
               <span>You'll be live to all your followers</span>
             </div>
           </div>
 
-          <div className="flex space-x-2 pt-4">
+          <div className="flex space-x-2 pt-2">
             <Button
               variant="outline"
               onClick={handleClose}
-              className="flex-1"
+              className="flex-1 h-8 text-xs"
               disabled={isStarting}
             >
               Cancel
@@ -674,11 +675,11 @@ export const GoLiveModal = ({
             <Button
               onClick={handleGoLive}
               disabled={!streamTitle.trim() || !streamCategory || isStarting}
-              className="flex-1 bg-red-600 hover:bg-red-700"
+              className="flex-1 h-8 text-xs bg-red-600 hover:bg-red-700"
             >
               {isStarting ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="flex items-center space-x-1">
+                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   <span>Starting...</span>
                 </div>
               ) : (
