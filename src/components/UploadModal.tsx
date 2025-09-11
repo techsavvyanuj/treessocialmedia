@@ -326,7 +326,7 @@ export const UploadModal = ({ isOpen, onClose, type }: UploadModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="w-full max-w-xs sm:max-w-sm md:max-w-md">
         <DialogHeader>
           <DialogTitle>{getTitle()}</DialogTitle>
         </DialogHeader>

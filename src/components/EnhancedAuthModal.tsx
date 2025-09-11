@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
 import { authAPI } from "@/services/api";
+import { usersAPI } from "@/services/api";
 import { toast } from "@/hooks/use-toast";
 import {
   Phone,
@@ -276,14 +277,41 @@ export const EnhancedAuthModal = ({
     try {
       // Check availability: username
       const usernameCheck = await authAPI.checkUsername(registerData.username);
+      // Custom username check: allow same name if surname is different
+      const [name, ...surnameArr] = registerData.fullName.trim().split(" ");
+      const surname = surnameArr.join(" ");
       if (!usernameCheck.success || usernameCheck.data?.available === false) {
-        toast({
-          title: "Username taken",
-          description: "Please choose a different username.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
+        // Fetch users with the same username
+        const searchRes = await usersAPI.searchUsers(registerData.username);
+        if (searchRes.success && Array.isArray(searchRes.data)) {
+          const conflict = searchRes.data.find((u: any) => {
+            if (!u.fullName) return false;
+            const [existingName, ...existingSurnameArr] = u.fullName.trim().split(" ");
+            const existingSurname = existingSurnameArr.join(" ");
+            // Block only if both name and surname match
+            return (
+              existingName.toLowerCase() === name.toLowerCase() &&
+              existingSurname.toLowerCase() === surname.toLowerCase()
+            );
+          });
+          if (conflict) {
+            toast({
+              title: "Username taken",
+              description: "A user with this name and surname already exists. Please choose a different username or surname.",
+              variant: "destructive",
+            });
+            setIsLoading(false);
+            return;
+          }
+        } else {
+          toast({
+            title: "Username taken",
+            description: "Please choose a different username.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
       }
       // Check email
       const emailCheck = await authAPI.checkEmail(registerData.email);
