@@ -39,7 +39,7 @@ const App = () => {
                     showAdmin ? (
                       <AdminDashboard onClose={() => setShowAdmin(false)} />
                     ) : (
-                      <MainApp onShowAdmin={() => setShowAdmin(true)} />
+                      <MainApp />
                     )
                   } 
                 />

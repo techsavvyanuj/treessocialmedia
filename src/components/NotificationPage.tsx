@@ -17,6 +17,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -44,6 +45,10 @@ export const NotificationPage = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [followRequests, setFollowRequests] = useState<any[]>([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
+  const [followingBack, setFollowingBack] = useState<string[]>([]); // Track follow back progress
+  const [followedBack, setFollowedBack] = useState<string[]>([]); // Track who we've followed back
+  const [showUnfollowConfirm, setShowUnfollowConfirm] = useState(false);
+  const [userToUnfollow, setUserToUnfollow] = useState<{id: string, name: string} | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -56,6 +61,28 @@ export const NotificationPage = () => {
         const newUnread =
           data.unreadCount ?? list.filter((n) => !n.isRead).length;
         setUnreadCount(newUnread);
+        
+        // Check follow relationships for follow notifications
+        const followNotifications = list.filter(n => n.type === "follow" && n.sender && typeof n.sender === "object");
+        const alreadyFollowing: string[] = [];
+        
+        for (const notification of followNotifications) {
+          const sender = notification.sender as any;
+          if (sender?._id) {
+            try {
+              // Check if we're already following this user
+              const userRes = await usersAPI.getUserProfile(sender._id);
+              if (userRes.success && userRes.data?.isFollowing) {
+                alreadyFollowing.push(sender._id);
+              }
+            } catch (error) {
+              console.log("Error checking follow status:", error);
+            }
+          }
+        }
+        
+        setFollowedBack(alreadyFollowing);
+        
         // Sync header badge with initial unread count
         window.dispatchEvent(
           new CustomEvent("treesh:notifications-set", {
@@ -154,6 +181,89 @@ export const NotificationPage = () => {
     }
   };
 
+  const handleFollowBack = async (senderId: string, senderName: string) => {
+    if (!senderId) return;
+    
+    setFollowingBack((prev) => [...prev, senderId]);
+    
+    try {
+      const res = await usersAPI.followUser(senderId);
+      if (res.success) {
+        toast({
+          title: "Following back",
+          description: `You are now following ${senderName}`,
+        });
+        
+        // Add to followed back list
+        setFollowedBack((prev) => [...prev, senderId]);
+        
+        // Mark the notification as read since user interacted with it
+        const followNotification = notifications.find(
+          (n) => n.type === "follow" && 
+          typeof n.sender === "object" && 
+          n.sender?._id === senderId
+        );
+        if (followNotification) {
+          await markAsRead(followNotification._id);
+        }
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to follow back",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to follow back",
+        variant: "destructive",
+      });
+    } finally {
+      setFollowingBack((prev) => prev.filter((id) => id !== senderId));
+    }
+  };
+
+  const handleUnfollowClick = (senderId: string, senderName: string) => {
+    setUserToUnfollow({ id: senderId, name: senderName });
+    setShowUnfollowConfirm(true);
+  };
+
+  const handleUnfollowConfirm = async () => {
+    if (!userToUnfollow) return;
+    
+    setFollowingBack((prev) => [...prev, userToUnfollow.id]);
+    
+    try {
+      const res = await usersAPI.followUser(userToUnfollow.id); // This will unfollow since they're already following
+      if (res.success) {
+        toast({
+          title: "Unfollowed",
+          description: `You unfollowed ${userToUnfollow.name}`,
+        });
+        
+        // Remove from followed back list
+        setFollowedBack((prev) => prev.filter(id => id !== userToUnfollow.id));
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to unfollow",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to unfollow",
+        variant: "destructive",
+      });
+    } finally {
+      setFollowingBack((prev) => prev.filter((id) => id !== userToUnfollow.id));
+      setShowUnfollowConfirm(false);
+      setUserToUnfollow(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-offwhite">
       {/* Mobile Header */}
@@ -248,9 +358,12 @@ export const NotificationPage = () => {
                       <CardContent className="p-4">
                         <div className="flex items-start space-x-3">
                           <div className="flex-shrink-0">
-                            {!n.isRead && (
-                              <div className="w-2 h-2 bg-primary rounded-full"></div>
-                            )}
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={avatar} />
+                              <AvatarFallback>
+                                {senderName.slice(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center space-x-2 mb-1">
@@ -258,7 +371,7 @@ export const NotificationPage = () => {
                                 {senderName}
                               </span>
                               <span className="text-sm text-gray-500">
-                                {n.type}
+                                {getNotificationIcon(n.type)}
                               </span>
                             </div>
                             <p className="text-sm text-gray-600 mb-2">
@@ -268,18 +381,47 @@ export const NotificationPage = () => {
                               <span className="text-xs text-gray-500">
                                 {time}
                               </span>
-                              {!n.isRead && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-6 px-2 text-xs"
-                                  onClick={() => markAsRead(n._id)}
-                                >
-                                  Mark as read
-                                </Button>
-                              )}
+                              <div className="flex items-center gap-2">
+                                {/* Follow Back Button for follow notifications */}
+                                {n.type === "follow" && sender?._id && (
+                                  <Button
+                                    size="sm"
+                                    variant={followedBack.includes(sender._id) ? "default" : "outline"}
+                                    className="h-7 px-3 text-xs"
+                                    onClick={() => 
+                                      followedBack.includes(sender._id) 
+                                        ? handleUnfollowClick(sender._id, senderName)
+                                        : handleFollowBack(sender._id, senderName)
+                                    }
+                                    disabled={followingBack.includes(sender._id)}
+                                  >
+                                    {followingBack.includes(sender._id) ? (
+                                      followedBack.includes(sender._id) ? "Unfollowing..." : "Following..."
+                                    ) : followedBack.includes(sender._id) ? (
+                                      "Following"
+                                    ) : (
+                                      "Follow Back"
+                                    )}
+                                  </Button>
+                                )}
+                                {!n.isRead && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 px-2 text-xs"
+                                    onClick={() => markAsRead(n._id)}
+                                  >
+                                    Mark as read
+                                  </Button>
+                                )}
+                              </div>
                             </div>
                           </div>
+                          {!n.isRead && (
+                            <div className="flex-shrink-0">
+                              <div className="w-2 h-2 bg-primary rounded-full"></div>
+                            </div>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
@@ -361,6 +503,37 @@ export const NotificationPage = () => {
           </div>
         )}
       </div>
+
+      {/* Unfollow Confirmation Dialog */}
+      <Dialog open={showUnfollowConfirm} onOpenChange={setShowUnfollowConfirm}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Unfollow {userToUnfollow?.name}?</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to unfollow {userToUnfollow?.name}? You can follow them again anytime.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowUnfollowConfirm(false);
+                setUserToUnfollow(null);
+              }}
+              disabled={userToUnfollow && followingBack.includes(userToUnfollow.id)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleUnfollowConfirm}
+              disabled={userToUnfollow && followingBack.includes(userToUnfollow.id)}
+            >
+              {userToUnfollow && followingBack.includes(userToUnfollow.id) ? "Unfollowing..." : "Unfollow"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

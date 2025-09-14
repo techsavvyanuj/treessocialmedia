@@ -35,7 +35,6 @@ import {
   Bell,
   Settings,
   LogOut,
-  Shield,
   Crown,
   Gift,
   Heart,
@@ -88,10 +87,10 @@ const mockPosts = [
 ];
 
 interface MainAppProps {
-  onShowAdmin: () => void;
+  // No props needed anymore
 }
 
-export const MainApp = ({ onShowAdmin }: MainAppProps) => {
+export const MainApp = () => {
   const { user, isAuthenticated, isLoading } = useAuth();
   // Mount chat hook globally to keep unread badges in sync app-wide
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -857,10 +856,6 @@ export const MainApp = ({ onShowAdmin }: MainAppProps) => {
               >
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onShowAdmin} className="font-opensans">
-                <Shield className="w-4 h-4 mr-2" />
-                Admin Panel
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={handleLogout}
