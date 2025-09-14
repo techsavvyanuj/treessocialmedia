@@ -208,8 +208,8 @@ export const ReportModal = ({ isOpen, onClose, type, targetId, targetName }: Rep
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <div className="flex items-center space-x-2">
             {getTypeIcon()}
             <DialogTitle>
@@ -219,7 +219,7 @@ export const ReportModal = ({ isOpen, onClose, type, targetId, targetName }: Rep
           </div>
         </DialogHeader>
         
-        <div className="space-y-6">
+        <div className="flex-1 overflow-y-auto pr-2 space-y-6">
           {/* Report Type Info */}
           <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
             <div className="flex items-center space-x-2">
@@ -242,10 +242,10 @@ export const ReportModal = ({ isOpen, onClose, type, targetId, targetName }: Rep
                 setSelectedReason(value);
                 if (errors.reason) setErrors(prev => ({ ...prev, reason: '' }));
               }}
-              className="space-y-3"
+              className="space-y-2"
             >
               {reportReasons[type].map((reason) => (
-                <div key={reason} className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-gray-50 transition-colors">
+                <div key={reason} className="flex items-center space-x-3 p-2 rounded-lg border hover:bg-gray-50 transition-colors">
                   <RadioGroupItem value={reason} id={reason} />
                   <Label htmlFor={reason} className="text-sm cursor-pointer flex-1">
                     {reason}
@@ -273,10 +273,10 @@ export const ReportModal = ({ isOpen, onClose, type, targetId, targetName }: Rep
                 setSeverity(value);
                 if (errors.severity) setErrors(prev => ({ ...prev, severity: '' }));
               }}
-              className="space-y-3"
+              className="space-y-2"
             >
               {severityLevels.map((level) => (
-                <div key={level.value} className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-gray-50 transition-colors">
+                <div key={level.value} className="flex items-center space-x-3 p-2 rounded-lg border hover:bg-gray-50 transition-colors">
                   <RadioGroupItem value={level.value} id={level.value} />
                   <div className="flex-1">
                     <Label htmlFor={level.value} className="text-sm font-medium cursor-pointer">
@@ -309,7 +309,7 @@ export const ReportModal = ({ isOpen, onClose, type, targetId, targetName }: Rep
                 setAdditionalInfo(e.target.value);
                 if (errors.additionalInfo) setErrors(prev => ({ ...prev, additionalInfo: '' }));
               }}
-              className="min-h-[100px] resize-none"
+              className="min-h-[80px] resize-none"
               maxLength={1000}
             />
             
@@ -336,8 +336,11 @@ export const ReportModal = ({ isOpen, onClose, type, targetId, targetName }: Rep
               False reports may result in account restrictions.
             </p>
           </div>
-          
-          <div className="flex space-x-3 pt-4">
+        </div>
+        
+        {/* Fixed footer with buttons */}
+        <div className="flex-shrink-0 border-t pt-4 mt-4">
+          <div className="flex space-x-3">
             <Button 
               variant="outline" 
               onClick={handleClose} 
