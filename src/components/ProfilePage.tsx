@@ -217,11 +217,15 @@ export const ProfilePage = () => {
             post.media?.find((m: any) => m?.type === "image")?.url ||
             "",
           video:
-            post.type === "reel"
-              ? post.video ||
-                post.media?.find((m: any) => m?.type === "video")?.url
-              : undefined,
-          type: post.type === "reel" ? "reel" : "post",
+            post.video ||
+            post.media?.find((m: any) => m?.type === "video")?.url ||
+            "",
+          type: 
+            post.video || post.media?.find((m: any) => m?.type === "video")?.url
+              ? "reel"
+              : post.type === "reel" 
+              ? "reel" 
+              : "post",
           likes: Array.isArray(post.likes)
             ? post.likes.length
             : post.likes || 0,
@@ -1216,11 +1220,22 @@ export const ProfilePage = () => {
                             className="aspect-square bg-gray-200 rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity relative group"
                             onClick={() => handlePostClick(post)}
                           >
-                            <img
-                              src={post.image}
-                              alt="Post"
-                              className="w-full h-full object-cover"
-                            />
+                            {post.video ? (
+                              <video
+                                src={post.video}
+                                className="w-full h-full object-cover"
+                                muted
+                                autoPlay
+                                loop
+                                playsInline
+                              />
+                            ) : (
+                              <img
+                                src={post.image}
+                                alt="Post"
+                                className="w-full h-full object-cover"
+                              />
+                            )}
                             {/* Delete button - only show on hover */}
                             <button
                               onClick={(e) => {

@@ -350,18 +350,18 @@ export const PostDetail: React.FC<PostDetailProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
-        <DialogHeader>
-          <DialogTitle className="sr-only">Post details</DialogTitle>
-          <DialogDescription className="sr-only">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0">
+        <DialogHeader className="sr-only">
+          <DialogTitle>Post details</DialogTitle>
+          <DialogDescription>
             View and interact with the post.
           </DialogDescription>
         </DialogHeader>
-        <div className="flex">
+        <div className="flex flex-col md:flex-row h-full">
           {/* Media Section */}
-          <div className="flex-1">
+          <div className="flex-1 bg-black flex items-center justify-center">
             <div className="relative">
-              {post.type === "reel" && post.video ? (
+              {post.video ? (
                 <video
                   src={post.video}
                   className="w-full h-[600px] object-cover bg-black"
@@ -441,9 +441,9 @@ export const PostDetail: React.FC<PostDetailProps> = ({
           </div>
 
           {/* Content Section */}
-          <div className="flex-1 max-w-md border-l">
+          <div className="flex-1 max-w-md border-l flex flex-col bg-white">
             {/* Header */}
-            <div className="p-4 border-b">
+            <div className="p-4 border-b shrink-0">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Avatar className="w-8 h-8">
@@ -499,9 +499,15 @@ export const PostDetail: React.FC<PostDetailProps> = ({
             </div>
 
             {/* Comments */}
-            <div className="flex-1 overflow-y-auto max-h-[300px]">
-              <div className="p-4 space-y-4">
-                {comments.map((comment) => (
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {comments.length === 0 ? (
+                <div className="text-center text-muted-foreground py-8">
+                  <MessageCircle className="w-12 h-12 mx-auto mb-2 opacity-30" />
+                  <p>No comments yet</p>
+                  <p className="text-xs">Be the first to comment!</p>
+                </div>
+              ) : (
+                comments.map((comment) => (
                   <div key={comment.id} className="flex items-start gap-3">
                     <Avatar className="w-6 h-6">
                       <AvatarImage
@@ -530,12 +536,12 @@ export const PostDetail: React.FC<PostDetailProps> = ({
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
+                ))
+              )}
             </div>
 
             {/* Actions */}
-            <div className="p-4 border-t">
+            <div className="p-4 border-t shrink-0">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-4">
                   <button
