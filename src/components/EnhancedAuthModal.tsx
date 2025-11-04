@@ -50,6 +50,15 @@ export const EnhancedAuthModal = ({
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [usernameError, setUsernameError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
+  const [passwordStrength, setPasswordStrength] = useState({
+    hasMinLength: false,
+    hasUpperCase: false,
+    hasLowerCase: false,
+    hasNumber: false,
+    hasSpecialChar: false,
+  });
 
   // OTP verification states
   const [otpSent, setOtpSent] = useState(false);
@@ -58,6 +67,53 @@ export const EnhancedAuthModal = ({
   const [resendOtpDisabled, setResendOtpDisabled] = useState(false);
 
   const { login, register } = useAuth();
+
+  // Password strength validator
+  const checkPasswordStrength = (password: string) => {
+    setPasswordStrength({
+      hasMinLength: password.length >= 8,
+      hasUpperCase: /[A-Z]/.test(password),
+      hasLowerCase: /[a-z]/.test(password),
+      hasNumber: /\d/.test(password),
+      hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+    });
+  };
+
+  // Check if username exists
+  const checkUsernameExists = async (username: string) => {
+    if (!username || username.length < 3) {
+      setUsernameError("");
+      return;
+    }
+    try {
+      const response = await authAPI.checkUsername(username);
+      if (response.success && !response.data?.available) {
+        setUsernameError("Username already exists");
+      } else {
+        setUsernameError("");
+      }
+    } catch (error) {
+      // Silently fail validation
+    }
+  };
+
+  // Check if phone exists
+  const checkPhoneExists = async (phone: string) => {
+    if (!phone || phone.length < 10) {
+      setPhoneError("");
+      return;
+    }
+    try {
+      const response = await authAPI.checkPhone(phone);
+      if (response.success && !response.data?.available) {
+        setPhoneError("Phone number already exists");
+      } else {
+        setPhoneError("");
+      }
+    } catch (error) {
+      // Silently fail validation
+    }
+  };
 
   const handleDemoLogin = async () => {
     setIsLoading(true);
@@ -488,16 +544,6 @@ export const EnhancedAuthModal = ({
               >
                 {isLoading ? "Signing in..." : "Sign In"}
               </Button>
-
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleDemoLogin}
-                className="w-full border-primary text-primary hover:bg-primary hover:text-white font-medium py-3 text-base"
-                disabled={isLoading}
-              >
-                Demo Login
-              </Button>
             </form>
           </TabsContent>
 
@@ -542,15 +588,23 @@ export const EnhancedAuthModal = ({
                     type="text"
                     placeholder="Choose a username"
                     value={registerData.username}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      const value = e.target.value;
                       setRegisterData((prev) => ({
                         ...prev,
-                        username: e.target.value,
-                      }))
-                    }
-                    className="pl-10 bg-white border-gray-200 focus:border-primary focus:ring-primary"
+                        username: value,
+                      }));
+                      // Check username availability after user stops typing
+                      checkUsernameExists(value);
+                    }}
+                    className={`pl-10 bg-white border-gray-200 focus:border-primary focus:ring-primary ${
+                      usernameError ? "border-red-500" : ""
+                    }`}
                   />
                 </div>
+                {usernameError && (
+                  <p className="text-xs text-red-500 mt-1">{usernameError}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -593,15 +647,23 @@ export const EnhancedAuthModal = ({
                     type="tel"
                     placeholder="Enter mobile number"
                     value={registerData.mobileNumber}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      const value = e.target.value;
                       setRegisterData((prev) => ({
                         ...prev,
-                        mobileNumber: e.target.value,
-                      }))
-                    }
-                    className="pl-10 bg-white border-gray-200 focus:border-primary focus:ring-primary"
+                        mobileNumber: value,
+                      }));
+                      // Check phone availability
+                      checkPhoneExists(value);
+                    }}
+                    className={`pl-10 bg-white border-gray-200 focus:border-primary focus:ring-primary ${
+                      phoneError ? "border-red-500" : ""
+                    }`}
                   />
                 </div>
+                {phoneError && (
+                  <p className="text-xs text-red-500 mt-1">{phoneError}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -618,12 +680,14 @@ export const EnhancedAuthModal = ({
                     type={showPassword ? "text" : "password"}
                     placeholder="Create a password"
                     value={registerData.password}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      const value = e.target.value;
                       setRegisterData((prev) => ({
                         ...prev,
-                        password: e.target.value,
-                      }))
-                    }
+                        password: value,
+                      }));
+                      checkPasswordStrength(value);
+                    }}
                     className="pl-10 bg-white border-gray-200 focus:border-primary focus:ring-primary"
                   />
                   <Button
@@ -640,6 +704,45 @@ export const EnhancedAuthModal = ({
                     )}
                   </Button>
                 </div>
+                
+                {/* Password Strength Indicator */}
+                {registerData.password && (
+                  <div className="mt-3 p-3 bg-gray-50 rounded-md space-y-2">
+                    <p className="text-xs font-medium text-gray-700">Password must contain:</p>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className={`w-4 h-4 ${passwordStrength.hasMinLength ? 'text-green-500' : 'text-gray-300'}`} />
+                        <span className={`text-xs ${passwordStrength.hasMinLength ? 'text-green-700' : 'text-gray-500'}`}>
+                          At least 8 characters
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className={`w-4 h-4 ${passwordStrength.hasUpperCase ? 'text-green-500' : 'text-gray-300'}`} />
+                        <span className={`text-xs ${passwordStrength.hasUpperCase ? 'text-green-700' : 'text-gray-500'}`}>
+                          One uppercase letter
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className={`w-4 h-4 ${passwordStrength.hasLowerCase ? 'text-green-500' : 'text-gray-300'}`} />
+                        <span className={`text-xs ${passwordStrength.hasLowerCase ? 'text-green-700' : 'text-gray-500'}`}>
+                          One lowercase letter
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className={`w-4 h-4 ${passwordStrength.hasNumber ? 'text-green-500' : 'text-gray-300'}`} />
+                        <span className={`text-xs ${passwordStrength.hasNumber ? 'text-green-700' : 'text-gray-500'}`}>
+                          One number
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className={`w-4 h-4 ${passwordStrength.hasSpecialChar ? 'text-green-500' : 'text-gray-300'}`} />
+                        <span className={`text-xs ${passwordStrength.hasSpecialChar ? 'text-green-700' : 'text-gray-500'}`}>
+                          One special character (!@#$%^&*)
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">

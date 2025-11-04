@@ -55,6 +55,11 @@ export const useChat = (chatType?: "arcade" | "trees") => {
 
   // Load data on mount
   useEffect(() => {
+    // Only load chats if user is authenticated
+    if (!user) {
+      return;
+    }
+    
     loadChats();
     const socket = connectSocket();
     const onNewMessage = (payload: any) => {
@@ -91,7 +96,7 @@ export const useChat = (chatType?: "arcade" | "trees") => {
       s.off("new_message", onNewMessage);
       window.removeEventListener("chatRead", onChatRead as EventListener);
     };
-  }, []);
+  }, [user]);
 
   const loadChats = async () => {
     try {

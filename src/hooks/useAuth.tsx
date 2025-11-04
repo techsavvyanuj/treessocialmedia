@@ -53,6 +53,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             localStorage.removeItem("token");
           }
         } catch (error) {
+          // Silently remove invalid token - don't show error on initial load
           localStorage.removeItem("token");
         }
       }
