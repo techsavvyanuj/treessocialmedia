@@ -172,23 +172,50 @@ export const EnhancedAuthModal = ({
       return;
     }
 
+    setIsLoading(true);
     try {
-      // Simulate OTP sending
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Determine identifier and type
+      const identifier = registerData.email || registerData.mobileNumber;
+      const type = registerData.email ? "email" : "sms";
+
+      // Call backend API to send OTP
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL || "https://api.inventurcubes.com/api"}/auth/send-otp`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            identifier,
+            type,
+            purpose: "registration",
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to send OTP");
+      }
+
       setOtpSent(true);
       startOtpTimer();
       toast({
-        title: "OTP Sent!",
-        description: `OTP has been sent to ${
-          registerData.email || registerData.mobileNumber
-        }`,
+        title: "OTP Sent! ✅",
+        description: `Verification code has been sent to ${
+          type === "email" ? "your email" : "your mobile number"
+        }. Check your ${type === "email" ? "inbox" : "messages"}.`,
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to send OTP. Please try again.",
+        description: error.message || "Failed to send OTP. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -323,7 +350,7 @@ export const EnhancedAuthModal = ({
     if (!otpSent || !otpCode) {
       toast({
         title: "Error",
-        description: "Please verify your OTP",
+        description: "Please verify your email with OTP first",
         variant: "destructive",
       });
       return;
@@ -331,7 +358,36 @@ export const EnhancedAuthModal = ({
 
     setIsLoading(true);
     try {
-      // Check availability: username
+      // Step 1: Verify OTP first
+      const identifier = registerData.email || registerData.mobileNumber;
+      const otpVerifyResponse = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL || "https://api.inventurcubes.com/api"}/auth/verify-otp`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            identifier,
+            purpose: "registration",
+            code: otpCode,
+          }),
+        }
+      );
+
+      const otpData = await otpVerifyResponse.json();
+
+      if (!otpVerifyResponse.ok) {
+        toast({
+          title: "Invalid OTP",
+          description: otpData.error || "Please check your OTP code and try again.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Step 2: Check availability: username
       const usernameCheck = await authAPI.checkUsername(registerData.username);
       // Custom username check: allow same name if surname is different
       const [name, ...surnameArr] = registerData.fullName.trim().split(" ");
