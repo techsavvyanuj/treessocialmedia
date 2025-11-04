@@ -3,10 +3,10 @@
 
 export const API_CONFIG = {
   // Base API URL from environment variable
-  BASE_URL: "https://51.20.41.208/api",
+  BASE_URL: "https://api.inventurcubes.com/api",
   
   // Socket URL from environment variable  
-  SOCKET_URL: "wss://51.20.41.208",
+  SOCKET_URL: "wss://api.inventurcubes.com",
   
   // Upload endpoints
   ENDPOINTS: {

@@ -2,13 +2,14 @@ import { Badge } from '@/components/ui/badge';
 import { Crown, Gem, Zap, Star } from 'lucide-react';
 
 interface SubscriberBadgeProps {
-  tier: 'tier1' | 'tier2' | 'tier3' | 'custom';
+  tier: 'gold' | 'diamond' | 'chrome' | 'custom' | 'tier1' | 'tier2' | 'tier3';
   size?: 'sm' | 'md' | 'lg';
   showText?: boolean;
+  showIcon?: boolean;
   className?: string;
 }
 
-const tierConfig = {
+const tierConfig: Record<string, { icon: any; color: string; text: string }> = {
   gold: {
     icon: Crown,
     color: 'bg-yellow-400 text-yellow-900',
@@ -23,6 +24,21 @@ const tierConfig = {
     icon: Zap,
     color: 'bg-purple-500 text-white',
     text: 'Chrome'
+  },
+  tier1: {
+    icon: Star,
+    color: 'bg-gray-400 text-white',
+    text: 'Tier 1'
+  },
+  tier2: {
+    icon: Star,
+    color: 'bg-blue-500 text-white',
+    text: 'Tier 2'
+  },
+  tier3: {
+    icon: Crown,
+    color: 'bg-purple-500 text-white',
+    text: 'Tier 3'
   },
   custom: {
     icon: Star,

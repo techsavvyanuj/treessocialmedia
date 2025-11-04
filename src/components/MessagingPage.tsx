@@ -45,7 +45,7 @@ export const MessagingPage = () => {
     selectChat,
     sendMessage,
     createChat,
-  } = useChat() as any;
+  } = useChat("trees") as any; // Only show Trees chats (not arcade chats)
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [isSending, setIsSending] = useState(false);

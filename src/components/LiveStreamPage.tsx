@@ -1,46 +1,33 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Camera, Users, X, Mic, MicOff, Video as VideoIcon, VideoOff, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Camera, Users, X, Mic, MicOff, Video as VideoIcon, VideoOff } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import * as videoSDKService from '@/services/videosdk';
-import { useAuth } from '@/hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
 
-interface JoinMessage {
-  id: string;
-  name: string;
-  time: number;
+interface LiveStreamPageProps {
+  isStreaming: boolean;
+  streamData?: any;
 }
 
-export const LiveStream = () => {
-  const { user } = useAuth();
+export const LiveStreamPage = ({ isStreaming: initialStreaming, streamData: initialData }: LiveStreamPageProps) => {
   const navigate = useNavigate();
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [streamData, setStreamData] = useState<any>(null);
+  const [isStreaming, setIsStreaming] = useState(initialStreaming);
+  const [streamData, setStreamData] = useState(initialData);
   const [viewers, setViewers] = useState<string[]>([]);
-  const [joinMessages, setJoinMessages] = useState<JoinMessage[]>([]);
+  const [joinMessages, setJoinMessages] = useState<Array<{ id: string; name: string; time: number }>>([]);
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
+  const [showGoLiveModal, setShowGoLiveModal] = useState(false);
   const [streamTitle, setStreamTitle] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [checkingStream, setCheckingStream] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
 
-  // Check for active stream on mount
   useEffect(() => {
-    checkForActiveStream();
-  }, []);
-
-  // Initialize camera when streaming starts
-  useEffect(() => {
-    if (isStreaming) {
+    if (isStreaming && videoRef.current) {
+      // Initialize camera
       initializeCamera();
     }
-    return () => {
-      stopCamera();
-    };
   }, [isStreaming]);
 
   // Auto-hide join messages after 3 seconds
@@ -52,28 +39,12 @@ export const LiveStream = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const checkForActiveStream = async () => {
-    setCheckingStream(true);
-    try {
-      const stream = await videoSDKService.getMyActiveStream();
-      if (stream) {
-        setStreamData(stream);
-        setIsStreaming(true);
-      }
-    } catch (error) {
-      console.log('No active stream');
-    } finally {
-      setCheckingStream(false);
-    }
-  };
-
   const initializeCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { width: 1280, height: 720 }, 
+        video: true, 
         audio: true 
       });
-      streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
@@ -87,13 +58,6 @@ export const LiveStream = () => {
     }
   };
 
-  const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-    }
-  };
-
   const handleGoLive = async () => {
     if (!streamTitle.trim()) {
       toast({
@@ -104,7 +68,6 @@ export const LiveStream = () => {
       return;
     }
 
-    setIsLoading(true);
     try {
       const data = await videoSDKService.startStream({
         title: streamTitle.trim(),
@@ -114,9 +77,10 @@ export const LiveStream = () => {
 
       setStreamData(data);
       setIsStreaming(true);
+      setShowGoLiveModal(false);
       
       toast({
-        title: '🔴 Live!',
+        title: 'Live!',
         description: 'Your stream is now live',
       });
     } catch (error: any) {
@@ -126,29 +90,32 @@ export const LiveStream = () => {
         description: error.message || 'Failed to start stream',
         variant: 'destructive',
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleEndStream = async () => {
     if (!streamData?.id) return;
 
-    setIsLoading(true);
     try {
       await videoSDKService.endStream(streamData.id);
       
-      stopCamera();
+      // Stop camera
+      if (videoRef.current && videoRef.current.srcObject) {
+        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+        tracks.forEach(track => track.stop());
+      }
+
       setIsStreaming(false);
       setStreamData(null);
       setViewers([]);
       setJoinMessages([]);
-      setStreamTitle('');
       
       toast({
         title: 'Stream Ended',
-        description: 'Your stream has been ended successfully',
+        description: 'Your stream has been ended',
       });
+
+      navigate('/');
     } catch (error: any) {
       console.error('Error ending stream:', error);
       toast({
@@ -156,45 +123,37 @@ export const LiveStream = () => {
         description: error.message || 'Failed to end stream',
         variant: 'destructive',
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const toggleMute = () => {
-    if (streamRef.current) {
-      const audioTracks = streamRef.current.getAudioTracks();
-      audioTracks.forEach(track => {
-        track.enabled = isMuted;
-      });
+    if (videoRef.current && videoRef.current.srcObject) {
+      const tracks = (videoRef.current.srcObject as MediaStream).getAudioTracks();
+      tracks.forEach(track => track.enabled = isMuted);
       setIsMuted(!isMuted);
     }
   };
 
   const toggleVideo = () => {
-    if (streamRef.current) {
-      const videoTracks = streamRef.current.getVideoTracks();
-      videoTracks.forEach(track => {
-        track.enabled = isVideoOff;
-      });
+    if (videoRef.current && videoRef.current.srcObject) {
+      const tracks = (videoRef.current.srcObject as MediaStream).getVideoTracks();
+      tracks.forEach(track => track.enabled = isVideoOff);
       setIsVideoOff(!isVideoOff);
     }
   };
 
-  if (checkingStream) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-pink-800 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
-    );
-  }
+  // Simulate viewer joining (in real app, this would come from WebSocket)
+  const simulateViewerJoin = (name: string) => {
+    setViewers(prev => [...prev, name]);
+    setJoinMessages(prev => [...prev, { id: Date.now().toString(), name, time: Date.now() }]);
+  };
 
   if (!isStreaming) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-pink-800 flex items-center justify-center p-4">
         <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 max-w-md w-full shadow-2xl">
           <div className="text-center mb-8">
-            <div className="w-24 h-24 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <div className="w-24 h-24 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
               <Camera className="w-12 h-12 text-white" />
             </div>
             <h1 className="text-3xl font-bold text-white mb-2">Go Live</h1>
@@ -207,22 +166,24 @@ export const LiveStream = () => {
               value={streamTitle}
               onChange={(e) => setStreamTitle(e.target.value)}
               className="bg-white/20 border-white/30 text-white placeholder:text-purple-200 text-lg py-6"
-              onKeyPress={(e) => e.key === 'Enter' && !isLoading && handleGoLive()}
+              onKeyPress={(e) => e.key === 'Enter' && handleGoLive()}
             />
 
             <Button
               onClick={handleGoLive}
-              disabled={!streamTitle.trim() || isLoading}
-              className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white py-6 text-lg font-semibold rounded-xl shadow-lg disabled:opacity-50"
+              disabled={!streamTitle.trim()}
+              className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white py-6 text-lg font-semibold rounded-xl shadow-lg"
             >
-              {isLoading ? (
-                <>Loading...</>
-              ) : (
-                <>
-                  <Camera className="w-5 h-5 mr-2" />
-                  Start Live Stream
-                </>
-              )}
+              <Camera className="w-5 h-5 mr-2" />
+              Start Live Stream
+            </Button>
+
+            <Button
+              onClick={() => navigate('/')}
+              variant="ghost"
+              className="w-full text-white hover:bg-white/10"
+            >
+              Cancel
             </Button>
           </div>
         </div>
@@ -248,9 +209,9 @@ export const LiveStream = () => {
       <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/60 to-transparent z-10">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="px-4 py-2 bg-red-600 rounded-full flex items-center space-x-2 animate-pulse">
-              <div className="w-3 h-3 bg-white rounded-full" />
-              <span className="text-white font-bold text-sm">LIVE</span>
+            <div className="px-4 py-2 bg-red-600 rounded-full flex items-center space-x-2">
+              <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
+              <span className="text-white font-semibold">LIVE</span>
             </div>
             <div className="px-4 py-2 bg-black/40 backdrop-blur-sm rounded-full flex items-center space-x-2">
               <Users className="w-4 h-4 text-white" />
@@ -260,7 +221,6 @@ export const LiveStream = () => {
 
           <Button
             onClick={handleEndStream}
-            disabled={isLoading}
             variant="ghost"
             size="icon"
             className="bg-black/40 backdrop-blur-sm hover:bg-black/60 text-white rounded-full"
@@ -277,12 +237,11 @@ export const LiveStream = () => {
       </div>
 
       {/* Join Messages */}
-      <div className="absolute top-32 left-4 right-4 space-y-2 z-10 pointer-events-none">
+      <div className="absolute top-32 left-4 right-4 space-y-2 z-10">
         {joinMessages.map((msg) => (
           <div
             key={msg.id}
-            className="bg-black/60 backdrop-blur-sm text-white px-4 py-2 rounded-full inline-block"
-            style={{ animation: 'fadeIn 0.3s ease-in' }}
+            className="bg-black/60 backdrop-blur-sm text-white px-4 py-2 rounded-full inline-block animate-fade-in"
           >
             <span className="font-semibold">{msg.name}</span> joined the stream
           </div>
@@ -297,7 +256,7 @@ export const LiveStream = () => {
             size="icon"
             className={`w-14 h-14 rounded-full ${
               isMuted ? 'bg-red-600 hover:bg-red-700' : 'bg-white/20 hover:bg-white/30'
-            } backdrop-blur-sm transition-all`}
+            } backdrop-blur-sm`}
           >
             {isMuted ? <MicOff className="w-6 h-6 text-white" /> : <Mic className="w-6 h-6 text-white" />}
           </Button>
@@ -307,21 +266,29 @@ export const LiveStream = () => {
             size="icon"
             className={`w-14 h-14 rounded-full ${
               isVideoOff ? 'bg-red-600 hover:bg-red-700' : 'bg-white/20 hover:bg-white/30'
-            } backdrop-blur-sm transition-all`}
+            } backdrop-blur-sm`}
           >
             {isVideoOff ? <VideoOff className="w-6 h-6 text-white" /> : <VideoIcon className="w-6 h-6 text-white" />}
           </Button>
 
           <Button
             onClick={handleEndStream}
-            disabled={isLoading}
-            className="px-8 py-6 bg-red-600 hover:bg-red-700 text-white rounded-full font-semibold text-lg shadow-lg transition-all disabled:opacity-50"
+            className="px-8 py-6 bg-red-600 hover:bg-red-700 text-white rounded-full font-semibold text-lg"
           >
-            {isLoading ? 'Ending...' : 'End Stream'}
+            End Stream
           </Button>
         </div>
       </div>
+
+      {/* Test button to simulate viewer join (remove in production) */}
+      {process.env.NODE_ENV === 'development' && (
+        <button
+          onClick={() => simulateViewerJoin(`User${Math.floor(Math.random() * 100)}`)}
+          className="absolute top-40 right-4 bg-blue-600 text-white px-4 py-2 rounded"
+        >
+          Test Join
+        </button>
+      )}
     </div>
   );
 };
-

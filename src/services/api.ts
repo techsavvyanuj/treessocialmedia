@@ -2,7 +2,7 @@ import { toast } from "@/hooks/use-toast";
 
 // API Configuration
 const API_BASE_URL =
-  (import.meta.env.VITE_API_BASE_URL || "https://51.20.41.208/api/").replace(/\/$/, "");
+  (import.meta.env.VITE_API_BASE_URL || "https://api.inventurcubes.com/api").replace(/\/$/, "");
 
 // Types
 export interface ApiResponse<T = any> {
@@ -598,8 +598,11 @@ export const matchesAPI = {
 
 // Chat API
 export const chatAPI = {
-  getChats: async (): Promise<ApiResponse<Chat[]>> => {
-    const response = await fetch(`${API_BASE_URL}/chat`, {
+  getChats: async (chatType?: "arcade" | "trees"): Promise<ApiResponse<Chat[]>> => {
+    const url = chatType 
+      ? `${API_BASE_URL}/chat?chatType=${chatType}`
+      : `${API_BASE_URL}/chat`;
+    const response = await fetch(url, {
       headers: getAuthHeaders(),
     });
     return handleResponse(response);

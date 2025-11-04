@@ -32,7 +32,7 @@ interface ChatUser {
   isOnline: boolean;
 }
 
-export const useChat = () => {
+export const useChat = (chatType?: "arcade" | "trees") => {
   const { user } = useAuth();
   const [chats, setChats] = useState<Chat[]>([]);
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
@@ -97,7 +97,7 @@ export const useChat = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await chatAPI.getChats();
+      const response = await chatAPI.getChats(chatType);
       if (response.success && response.data) {
         const normalized = (response.data as any[]).map(normalizeChat);
         setChats(normalized);

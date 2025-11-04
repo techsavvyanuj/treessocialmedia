@@ -10,7 +10,7 @@ export const getSocket = () => {
       /\/api$/,
       ""
     ) ||
-    "wss://51.20.41.208";
+    "wss://api.inventurcubes.com";
   const token = localStorage.getItem("token");
   socket = io(url, {
     autoConnect: false,
