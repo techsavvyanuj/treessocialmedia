@@ -37,6 +37,9 @@ interface Post {
   user: { name: string; username: string; avatar: string; verified: boolean };
   content: string;
   image?: string;
+  video?: string;
+  media?: string;
+  mediaType?: 'image' | 'video';
   timestamp: string;
   likes: number;
   comments: number;
@@ -290,13 +293,25 @@ export const FeedPost = ({ post, onReport }: FeedPostProps) => {
 
         <p className="mb-3">{post.content}</p>
 
-        {post.image && (
+        {/* Render media (image or video) */}
+        {(post.image || post.video || post.media) && (
           <div className="mb-3 rounded-lg overflow-hidden cursor-pointer hover:opacity-95 transition-opacity">
-            <img
-              src={post.image}
-              alt="Post content"
-              className="w-full h-auto"
-            />
+            {(post.mediaType === 'video' || post.video || (post.media && !post.image)) ? (
+              <video
+                src={post.video || post.media}
+                controls
+                className="w-full h-auto max-h-[500px] object-contain bg-black"
+                playsInline
+              >
+                Your browser does not support the video tag.
+              </video>
+            ) : (
+              <img
+                src={post.image || post.media}
+                alt="Post content"
+                className="w-full h-auto"
+              />
+            )}
           </div>
         )}
 

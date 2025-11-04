@@ -10,6 +10,9 @@ interface FeedPostData {
   user: { name: string; username: string; avatar: string; verified: boolean };
   content: string;
   image?: string;
+  video?: string;
+  media?: string;
+  mediaType?: 'image' | 'video';
   timestamp: string;
   likes: number;
   comments: number;
@@ -35,6 +38,10 @@ const convertApiPostToFeedPost = (apiPost: any): FeedPostData => {
   const image =
     apiPost.image ||
     (Array.isArray(apiPost.images) ? apiPost.images[0] : undefined);
+  const video = apiPost.video || apiPost.videoUrl;
+  const media = apiPost.media;
+  const mediaType = apiPost.mediaType || (video ? 'video' : image ? 'image' : undefined);
+  
   return {
     id: apiPost.id || apiPost._id || Math.random().toString(),
     user: {
@@ -45,6 +52,9 @@ const convertApiPostToFeedPost = (apiPost: any): FeedPostData => {
     },
     content: apiPost.content || "",
     image,
+    video,
+    media,
+    mediaType,
     timestamp:
       apiPost.createdAt || apiPost.timestamp || new Date().toISOString(),
     likes:
