@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -14,6 +14,8 @@ import {
   Send,
   AlertCircle,
   Eye,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -65,6 +67,8 @@ export const FeedPost = ({ post, onReport }: FeedPostProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]); // start empty, no mock
   const [commentCount, setCommentCount] = useState<number>(post.comments || 0);
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   // Skipping initial fetch of comments as GET /posts/:id is not supported by backend.
   // We display count from feed item and update locally when user adds comments.
@@ -237,6 +241,13 @@ export const FeedPost = ({ post, onReport }: FeedPostProps) => {
     });
   };
 
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
+
   return (
     <Card
       className={`${
@@ -295,16 +306,33 @@ export const FeedPost = ({ post, onReport }: FeedPostProps) => {
 
         {/* Render media (image or video) */}
         {(post.image || post.video || post.media) && (
-          <div className="mb-3 rounded-lg overflow-hidden cursor-pointer hover:opacity-95 transition-opacity">
+          <div className="mb-3 rounded-lg overflow-hidden relative">
             {(post.mediaType === 'video' || post.video || (post.media && !post.image)) ? (
-              <video
-                src={post.video || post.media}
-                controls
-                className="w-full h-auto max-h-[500px] object-contain bg-black"
-                playsInline
-              >
-                Your browser does not support the video tag.
-              </video>
+              <>
+                <video
+                  ref={videoRef}
+                  src={post.video || post.media}
+                  className="w-full h-auto max-h-[500px] object-contain bg-black"
+                  playsInline
+                  autoPlay
+                  loop
+                  muted={isMuted}
+                >
+                  Your browser does not support the video tag.
+                </video>
+                {/* Mute/Unmute Button */}
+                <button
+                  onClick={toggleMute}
+                  className="absolute bottom-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all"
+                  aria-label={isMuted ? "Unmute" : "Mute"}
+                >
+                  {isMuted ? (
+                    <VolumeX className="w-5 h-5" />
+                  ) : (
+                    <Volume2 className="w-5 h-5" />
+                  )}
+                </button>
+              </>
             ) : (
               <img
                 src={post.image || post.media}
