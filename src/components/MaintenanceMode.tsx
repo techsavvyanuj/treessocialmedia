@@ -13,7 +13,7 @@ export const MaintenanceMode = () => {
         </h1>
         
         <p className="text-lg md:text-xl text-gray-600 mb-8">
-          This website is temporarily under maintenance.
+          This website is temporarily down due to unclear payment of the developer.
         </p>
         
         <div className="bg-indigo-50 border-l-4 border-indigo-600 p-6 rounded-lg">
