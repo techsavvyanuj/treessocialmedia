@@ -8,12 +8,16 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { AuthProvider } from '@/hooks/useAuth.tsx';
 import { MainApp } from './components/MainApp';
 import { AdminDashboard } from './components/AdminDashboard';
+import { MaintenanceMode } from './components/MaintenanceMode';
 
 const queryClient = new QueryClient();
 
 const App = () => {
   const [showAdmin, setShowAdmin] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+
+  // Set to true to enable maintenance mode
+  const isMaintenanceMode = true;
 
   useEffect(() => {
     // Prevent hydration mismatch
@@ -22,6 +26,11 @@ const App = () => {
 
   if (!isInitialized) {
     return null;
+  }
+
+  // Show maintenance mode if enabled
+  if (isMaintenanceMode) {
+    return <MaintenanceMode />;
   }
 
   return (
